@@ -1,0 +1,9 @@
+version: 0.0
+os: linux
+# Specify files to copy
+files:
+  - source: /src
+    destination: /var/www/html/myapp
+  - source: /config
+    destination: /etc/myapp/config
+    
