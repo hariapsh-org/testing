@@ -6,4 +6,4 @@ files:
     destination: /var/www/html/myapp
   - source: /config
     destination: /etc/myapp/config
-    
+#dummy    
