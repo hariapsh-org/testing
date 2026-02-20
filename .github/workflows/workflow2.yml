@@ -5,8 +5,8 @@ jobs:
   test-fleet:
     runs-on:
       - codebuild-aws-shr-${{ github.run_id }}-${{ github.run_attempt }}
-      #- fleet:bindfleet
-      - image:arm-3.0
+      - fleet:fleet1
+      - image:linux-5.0
     steps:
       - uses: actions/checkout@v4
       - run: |
