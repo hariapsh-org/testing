@@ -10,7 +10,7 @@ jobs:
   runtime-probe:
     name: Inspect CodeBuild runner runtimes
     runs-on:
-      - codebuild-aws-shr-${{ github.run_id }}-${{ github.run_attempt }}
+      - codebuild-aws-shr-eu-${{ github.run_id }}-${{ github.run_attempt }}
       - buildspec-override:true
 
     timeout-minutes: 10
