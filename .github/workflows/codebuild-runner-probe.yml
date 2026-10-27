@@ -1,0 +1,83 @@
+name: CodeBuild Runner Runtime Probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-probe:
+    name: Inspect CodeBuild runner runtimes
+    runs-on:
+      - codebuild-aws-shr-${{ github.run_id }}-${{ github.run_attempt }}
+
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Print CodeBuild and runner environment
+        shell: bash
+        run: |
+          set -u
+
+          echo "=== Build information ==="
+          echo "UTC time: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          echo "GitHub run ID: $GITHUB_RUN_ID"
+          echo "GitHub run attempt: $GITHUB_RUN_ATTEMPT"
+          echo "Runner name: ${RUNNER_NAME:-not set}"
+          echo "Runner OS: ${RUNNER_OS:-not set}"
+          echo "Runner architecture: ${RUNNER_ARCH:-not set}"
+          echo "Runner temporary directory: ${RUNNER_TEMP:-not set}"
+          echo "CodeBuild build ID: ${CODEBUILD_BUILD_ID:-not set}"
+          echo "AWS region: ${AWS_REGION:-not set}"
+
+      - name: Inspect default Node.js on PATH
+        shell: bash
+        run: |
+          set -u
+
+          echo "=== Default Node.js on PATH ==="
+
+          if command -v node >/dev/null 2>&1; then
+            echo "node path: $(command -v node)"
+            echo "node version: $(node --version)"
+          else
+            echo "No node executable was found on PATH"
+          fi
+
+      - name: Inspect installed GitHub Actions runner
+        shell: bash
+        run: |
+          set -u
+
+          echo "=== GitHub Actions runner installation ==="
+
+          if [[ -n "${RUNNER_TEMP:-}" ]]; then
+            RUNNER_ROOT="$(dirname "$(dirname "$RUNNER_TEMP")")"
+            echo "Calculated runner root: $RUNNER_ROOT"
+
+            LISTENER="$RUNNER_ROOT/bin/Runner.Listener"
+            if [[ -x "$LISTENER" ]]; then
+              echo -n "Runner.Listener version: "
+              "$LISTENER" --version
+            else
+              echo "Runner.Listener was not found at: $LISTENER"
+            fi
+
+            BUNDLED_NODE="$RUNNER_ROOT/externals/node24/bin/node"
+            if [[ -x "$BUNDLED_NODE" ]]; then
+              echo "Bundled node path: $BUNDLED_NODE"
+              echo -n "Bundled node version: "
+              "$BUNDLED_NODE" --version
+            else
+              echo "Bundled node24 was not found at: $BUNDLED_NODE"
+            fi
+          else
+            echo "RUNNER_TEMP is unavailable; runner root cannot be calculated"
+          fi
+
+      - name: Probe runtime from inside a JavaScript action
+        uses: ./.github/actions/node-runtime-probe
