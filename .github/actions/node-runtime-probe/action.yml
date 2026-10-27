@@ -1,0 +1,6 @@
+name: Node Runtime Probe
+description: Prints the Node.js runtime used by a JavaScript GitHub Action
+
+runs:
+  using: node24
+  main: index.js
